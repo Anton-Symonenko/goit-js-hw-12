@@ -14,18 +14,32 @@ import './css/styles.css';
 
 const searchForm = document.querySelector('.form');
 
+const loadMoreBtn = document.querySelector('.load-more');
+
+let currentQuery = '';
+let currentPage = 1;
+
+function showLoadMoreBtn() {
+  loadMoreBtn.classList.remove('hidden');
+
+}
+function hideLoadMoreBtn() {
+  loadMoreBtn.classList.add('hidden');
+}
+
 searchForm.addEventListener('submit', async event => {
   event.preventDefault();
 
-  const imageQuery = event.target.elements["search-text"].value.trim();
+  const currentQuery = event.target.elements["search-text"].value.trim();
+  currentPage = 1;
 
-  if (!imageQuery) return;
+  if (!currentQuery) return;
 
   clearGallery();
   showLoader();
 
   try {
-    const data = await getImagesByQuery(imageQuery);
+    const data = await getImagesByQuery(currentQuery, currentPage);
 
    if (data.hits.length === 0) {
   iziToast.error({
@@ -34,7 +48,9 @@ searchForm.addEventListener('submit', async event => {
   });
 
 } else {
-  createGallery(data.hits);
+     createGallery(data.hits);
+     showLoadMoreBtn();
+     
 }
   }catch (error) {
     console.error(error);
@@ -49,5 +65,26 @@ searchForm.addEventListener('submit', async event => {
 
 });
 
+loadMoreBtn.addEventListener('click', async () => {
+  currentPage += 1;
 
+  showLoader();
+  hideLoadMoreBtn();
+
+  try {
+    const data = await getImagesByQuery(currentQuery, currentPage);
+
+    createGallery(data.hits);
+    showLoadMoreBtn();
+  } catch (error) {
+    console.error(error);
+    iziToast.error({
+      title: 'Error',
+      message: 'An error occurred while fetching images. Please try again later.',
+    });
+  } finally {
+    hideLoader();
+  }
+
+});
 
