@@ -81,7 +81,15 @@ loadMoreBtn.addEventListener('click', async () => {
 
   try {
     const data = await getImagesByQuery(currentQuery, currentPage);
-createGallery(data.hits);
+    createGallery(data.hits);
+
+    const galleryItem = document.querySelector('.gallery-item');
+    const cardHeight = galleryItem.getBoundingClientRect().height;
+    window.scrollBy({
+      top: cardHeight * 3,
+      behavior: 'smooth',
+});
+
     const totalPagesLoaded = currentPage * 15;
     if (totalPagesLoaded >= data.totalHits) {
       hideLoadMoreBtn();
